@@ -12,7 +12,7 @@ class OpenERP {
    * Add new json-rpc entry points here
    *
    */
-  var $urls = array('read' => "/web/dataset/search_read",
+  var $urls = array('search_read' => "/web/dataset/search_read",
                     'authenticate' => "/web/session/authenticate",
                     'get_session_info' => "/web/session/get_session_info",
                     'destroy' => "/web/session/destroy");
@@ -34,7 +34,6 @@ class OpenERP {
         'db' => $this->db,
         'login' => $login,
         'password' => $password,
-        'session_id' => "",
       ));
     $this->session_id = $req['session_id'];
     $this->authenticated = $req["uid"] !== False;
@@ -96,11 +95,36 @@ class OpenERP {
       $params = array();
     else
       $params = $params[0];
-    if (!array_key_exists("session_id", $params) && isset($this->session_id))
-        $params["session_id"] = $this->session_id;
     return $this->json($this->base  . $url, $params);
   }
 
+}
+
+class OpenERPModel {
+
+    function __construct($oe, $model) {
+        $this->oe = $oe;
+        $this->model = $model;
+    }
+
+    // TODO: support kwargs using call_kw
+    function __call($method, $params) {
+        if (!array_key_exists($method, $this->oe->urls)) {
+            $url = '/web/dataset/call';
+        }
+        else {
+            $url = $this->oe->urls[$method];
+        }
+        if (sizeof($params) == 0)
+          $params = array();
+        else
+          $params = $params[0];
+        return $this->oe->json($this->oe->base  . $url, array(
+            'model' => $this->model,
+            'method' => $method,
+            'args' => $params)
+        );
+    }
 }
 
 ?>

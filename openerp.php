@@ -3,7 +3,7 @@
 require_once 'tivoka/include.php';
 
 
-class OpenErpException extends Exception {};
+class OpenERPException extends Exception {};
 
 
 class OpenERP {
@@ -59,7 +59,7 @@ class OpenERP {
 
     try {
       $req = $this->get_session_info();
-    } catch (OpenErpException $e) {
+    } catch (OpenERPException $e) {
       $this->authenticated = False;
       return False;
     }
@@ -78,7 +78,7 @@ class OpenERP {
   function json($url, $params) {
     $req = $this->get_connection($url)->sendRequest('call', $params);
     if ($req->isError()) {
-      throw new OpenErpException('Error '.$req->error.': '.$req->errorMessage);
+      throw new OpenERPException('Error '.$req->error.': '.$req->errorMessage."\n ".json_encode($req->errorData));
     }
     // Very bad way to support Set-Cookie
     if (isset($req->responseHeaders['Set-Cookie']))
